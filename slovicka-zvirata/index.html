@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Slovíčka: Zvířata — Deutch</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #38bdf8;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  nav { align-self: flex-start; padding: 1rem 1.5rem; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+  nav a:hover { color: var(--accent); }
+  h1 { margin: 0 0 1.5rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 2rem;
+    width: min(420px, 90vw);
+    text-align: center;
+  }
+  .word-de {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .emoji { font-size: 3.5rem; margin-bottom: 0.8rem; }
+  .choices {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+  }
+  button.choice {
+    font-size: 1.05rem;
+    padding: 0.7rem;
+    border-radius: 10px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: var(--text);
+    cursor: pointer;
+  }
+  button.choice:hover { border-color: var(--accent); }
+  button.choice.correct { border-color: var(--good); background: #14301f; }
+  button.choice.wrong { border-color: var(--bad); background: #301414; }
+  .score { margin-top: 1rem; color: var(--muted); }
+  .next {
+    margin-top: 1.2rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    border: none;
+    background: var(--accent);
+    color: #04202e;
+    font-weight: 600;
+    cursor: pointer;
+    display: none;
+  }
+</style>
+</head>
+<body>
+<nav><a href="../">&larr; zpět na seznam appek</a></nav>
+<h1>🐾 Slovíčka: Zvířata</h1>
+<div class="card">
+  <div class="emoji" id="emoji"></div>
+  <div class="word-de" id="word"></div>
+  <div class="choices" id="choices"></div>
+  <button class="next" id="next">Další slovíčko →</button>
+  <div class="score" id="score"></div>
+</div>
+
+<script>
+  const words = [
+    { de: "der Hund", cs: "pes", emoji: "🐶" },
+    { de: "die Katze", cs: "kočka", emoji: "🐱" },
+    { de: "das Pferd", cs: "kůň", emoji: "🐴" },
+    { de: "die Kuh", cs: "kráva", emoji: "🐄" },
+    { de: "das Schaf", cs: "ovce", emoji: "🐑" },
+    { de: "das Schwein", cs: "prase", emoji: "🐷" },
+    { de: "die Maus", cs: "myš", emoji: "🐭" },
+    { de: "der Vogel", cs: "pták", emoji: "🐦" },
+    { de: "der Fisch", cs: "ryba", emoji: "🐟" },
+    { de: "der Hase", cs: "zajíc", emoji: "🐰" },
+  ];
+
+  let score = 0, total = 0, current = null;
+
+  function shuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  function nextWord() {
+    document.getElementById('next').style.display = 'none';
+    current = words[Math.floor(Math.random() * words.length)];
+    document.getElementById('emoji').textContent = current.emoji;
+    document.getElementById('word').textContent = current.de;
+
+    const wrongOptions = shuffle(words.filter(w => w.cs !== current.cs)).slice(0, 2);
+    const options = shuffle([current, ...wrongOptions]);
+
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.textContent = opt.cs;
+      btn.onclick = () => answer(btn, opt.cs === current.cs);
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function answer(btn, isCorrect) {
+    total++;
+    document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+    if (isCorrect) {
+      score++;
+      btn.classList.add('correct');
+    } else {
+      btn.classList.add('wrong');
+      [...document.querySelectorAll('.choice')]
+        .find(b => b.textContent === current.cs)
+        .classList.add('correct');
+    }
+    updateScore();
+    document.getElementById('next').style.display = 'inline-block';
+  }
+
+  function updateScore() {
+    document.getElementById('score').textContent = `Skóre: ${score} / ${total}`;
+  }
+
+  document.getElementById('next').onclick = nextWord;
+  nextWord();
+</script>
+</body>
+</html>
